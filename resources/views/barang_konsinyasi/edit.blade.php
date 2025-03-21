@@ -1,0 +1,30 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h2 class="mb-4">Edit Barang Konsinyasi</h2>
+    <a href="{{ route('barang_konsinyasi.index') }}" class="btn btn-secondary mb-3">Kembali</a>
+
+    <form action="{{ route('barang_konsinyasi.update', $barangKonsinyasi->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="mb-3">
+            <label>Nama Barang</label>
+            <input type="text" name="nama_barang" class="form-control" value="{{ $barangKonsinyasi->nama_barang }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Stok</label>
+            <input type="number" name="stok" class="form-control" value="{{ $barangKonsinyasi->stok }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Harga</label>
+            <input type="number" name="harga" class="form-control" step="0.01" value="{{ $barangKonsinyasi->harga }}" required>
+        </div>
+        <div class="mb-3">
+            <label>Pemilik</label>
+            <input type="text" name="pemilik" class="form-control" value="{{ $barangKonsinyasi->pemilik }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+@endsection

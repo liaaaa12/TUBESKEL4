@@ -27,6 +27,19 @@ class VendorBarangResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('kode_vendor_barang')
+                    ->label('Kode Vendor')
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->default(function () {
+                        $latestVendor = VendorBarang::latest()->first();
+                        if (!$latestVendor) {
+                            return 'VB001';
+                        }
+                        $currentNumber = intval(substr($latestVendor->kode_vendor_barang, 2));
+                        $nextNumber = $currentNumber + 1;
+                        return 'VB' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+                    }),
                 Forms\Components\TextInput::make('nama_vndr_brg')
                     ->required()
                     ->maxLength(255)
@@ -49,6 +62,10 @@ class VendorBarangResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->sortable()
                     ->label('ID'),
+                Tables\Columns\TextColumn::make('kode_vendor_barang')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Kode Vendor'),
                 Tables\Columns\TextColumn::make('nama_vndr_brg')
                     ->searchable()
                     ->sortable()

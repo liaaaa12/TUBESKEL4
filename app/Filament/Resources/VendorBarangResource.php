@@ -46,6 +46,9 @@ class VendorBarangResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->sortable()
+                    ->label('ID'),
                 Tables\Columns\TextColumn::make('nama_vndr_brg')
                     ->searchable()
                     ->sortable()

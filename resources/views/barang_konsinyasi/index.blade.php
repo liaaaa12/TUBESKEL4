@@ -12,6 +12,7 @@
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>
+                <th>ID</th>
                 <th>No</th>
                 <th>Nama Barang</th>
                 <th>Stok</th>
@@ -23,6 +24,7 @@
         <tbody>
             @foreach($barang as $key => $item)
             <tr>
+                <td>{{ $item->id }}</td>
                 <td>{{ $key+1 }}</td>
                 <td>{{ $item->nama_barang }}</td>
                 <td>{{ $item->stok }}</td>

@@ -46,6 +46,11 @@ class BarangKonsinyasiResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('nama_barang')
                     ->label('Nama Barang')
                     ->sortable()

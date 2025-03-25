@@ -19,6 +19,11 @@ class BarangKonsinyasiResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('kode_barang_konsinyasi')
+                    ->label('Kode Barang Konsinyasi')
+                    ->disabled() // Agar tidak bisa diedit manual
+                    ->dehydrated(false), // Tidak dikirimkan saat submit form
+
                 Forms\Components\TextInput::make('nama_barang')
                     ->label('Nama Barang')
                     ->required()
@@ -48,6 +53,11 @@ class BarangKonsinyasiResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('kode_barang_konsinyasi')
+                    ->label('Kode Barang Konsinyasi')
                     ->sortable()
                     ->searchable(),
 

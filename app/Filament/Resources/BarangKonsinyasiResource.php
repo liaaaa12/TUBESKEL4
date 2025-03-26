@@ -7,6 +7,12 @@ use App\Models\BarangKonsinyasi;
 use Filament\Resources\Resource;
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class BarangKonsinyasiResource extends Resource
 {
@@ -19,32 +25,28 @@ class BarangKonsinyasiResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('kode_barang_konsinyasi')
+                TextInput::make('kode_barang_konsinyasi')
                     ->label('Kode Barang Konsinyasi')
-                    ->default(fn () => BarangKonsinyasi::getKodeBarangKonsinyasi())
-                    ->readonly()
                     ->required(),
-
-                Forms\Components\TextInput::make('nama_barang')
+                TextInput::make('nama_barang')
                     ->label('Nama Barang')
-                    ->required()
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('stok')
+                    ->required(),
+                FileUpload::make('foto')
+                    ->label('Foto')
+                    ->directory('foto')
+                    ->image()
+                    ->required(),
+                TextInput::make('stok')
                     ->label('Stok')
                     ->numeric()
                     ->required(),
-
-                Forms\Components\TextInput::make('harga')
+                TextInput::make('harga')
                     ->label('Harga')
                     ->numeric()
-                    ->required()
-                    ->prefix('Rp'),
-
-                Forms\Components\TextInput::make('pemilik')
+                    ->required(),
+                TextInput::make('pemilik')
                     ->label('Pemilik')
-                    ->required()
-                    ->maxLength(255),
+                    ->required(),
             ]);
     }
 
@@ -52,48 +54,26 @@ class BarangKonsinyasiResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('kode_barang_konsinyasi')
-                    ->label('Kode Barang Konsinyasi')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('nama_barang')
-                    ->label('Nama Barang')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('stok')
-                    ->label('Stok')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('harga')
-                    ->label('Harga')
-                    ->sortable()
-                    ->money('IDR'),
-
-                Tables\Columns\TextColumn::make('pemilik')
-                    ->label('Pemilik')
-                    ->sortable()
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Dibuat Pada')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('kode_barang_konsinyasi')->label('Kode Barang'),
+                TextColumn::make('nama_barang')->label('Nama Barang')->sortable(),
+                ImageColumn::make('foto')
+                    ->label('Foto')
+                    ->circular()
+                    ->size(40),
+                TextColumn::make('stok')->label('Stok')->sortable(),
+                TextColumn::make('harga')->label('Harga')->sortable(),
+                TextColumn::make('pemilik')->label('Pemilik')->sortable(),
             ])
-            ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
     }
 
     public static function getPages(): array

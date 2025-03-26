@@ -21,8 +21,9 @@ class BarangKonsinyasiResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('kode_barang_konsinyasi')
                     ->label('Kode Barang Konsinyasi')
-                    ->disabled() // Agar tidak bisa diedit manual
-                    ->dehydrated(false), // Tidak dikirimkan saat submit form
+                    ->default(fn () => BarangKonsinyasi::getKodeBarangKonsinyasi())
+                    ->readonly()
+                    ->required(),
 
                 Forms\Components\TextInput::make('nama_barang')
                     ->label('Nama Barang')

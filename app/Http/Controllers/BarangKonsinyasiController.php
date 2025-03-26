@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\BarangKonsinyasi;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreBarangRequest;
+use App\Http\Requests\UpdateBarangRequest;
+
+use Illuminate\Foundation\Http\FormRequest;
 
 class BarangKonsinyasiController extends Controller
 {
@@ -18,9 +21,10 @@ class BarangKonsinyasiController extends Controller
         return view('barang_konsinyasi.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreBarangKonsinyasiRequest $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'kode_barang_konsinyasi' => 'required',
             'nama_barang' => 'required|string|max:255',
             'stok' => 'required|integer',
             'harga' => 'required|numeric',
@@ -37,7 +41,7 @@ class BarangKonsinyasiController extends Controller
         return view('barang_konsinyasi.edit', compact('barangKonsinyasi'));
     }
 
-    public function update(Request $request, BarangKonsinyasi $barangKonsinyasi)
+    public function update(UpdateBarangKonsinyasiRequest $request, BarangKonsinyasi $barangKonsinyasi)
     {
         $request->validate([
             'nama_barang' => 'required|string|max:255',

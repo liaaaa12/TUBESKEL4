@@ -27,7 +27,9 @@ class BarangKonsinyasiResource extends Resource
             ->schema([
                 TextInput::make('kode_barang_konsinyasi')
                     ->label('Kode Barang Konsinyasi')
-                    ->required(),
+                    ->default(fn () => BarangKonsinyasi::getKodeBarangKonsinyasi())
+                    ->required()
+                    ->readonly(),
                 TextInput::make('nama_barang')
                     ->label('Nama Barang')
                     ->required(),

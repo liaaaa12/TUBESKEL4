@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
+// tambahan
 use Illuminate\Support\Facades\DB;
 
 class Barang extends Model
 {
+    use HasFactory;
 
     protected $table = 'barang'; // Nama tabel eksplisit
 
@@ -16,13 +19,13 @@ class Barang extends Model
     public static function getKodeBarang()
     {
         // query kode perusahaan
-        $sql = "SELECT IFNULL(MAX(Kode_barang), 'AB000') as Kode_barang 
+        $sql = "SELECT IFNULL(MAX(Kode_barang), 'AB000') as Kode_barang
                 FROM barang ";
         $kodebarang = DB::select($sql);
 
         // cacah hasilnya
         foreach ($kodebarang as $kdbrg) {
-            $kd = $kdbrg->Kode_barang;
+            $kd = $kdbrg->kode_barang;
         }
         // Mengambil substring tiga digit akhir dari string PR-000
         $noawal = substr($kd,-3);
@@ -36,7 +39,12 @@ class Barang extends Model
     public function setHargaBarangAttribute($value)
     {
         // Hapus koma (,) dari nilai sebelum menyimpannya ke database
-        $this->attributes['harga_barang'] = str_replace('.', '', $value);
+        $this->attributes['harga_barang'] = str_replace(',', '', $value);
+    }
+
+    // Relasi dengan tabel relasi many to many nya
+    public function penjualanBarang()
+    {
+        return $this->hasMany(PenjualanBarang::class, 'Kode_barang');
     }
 }
-

@@ -21,8 +21,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CoaResource extends Resource
 {
     protected static ?string $model = Coa::class;
+    protected static ?string $navigationLabel = 'Coa';
+    protected static ?string $slug = 'Coa';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
 
     public static function form(Form $form): Form
     {
@@ -44,6 +46,21 @@ class CoaResource extends Resource
                         ->required()
                         ->placeholder('Masukkan nama akun')
                     ,
+                    TextInput::make('saldo')
+                        ->numeric()
+                        ->default(0)
+                        ->prefix('Rp ')
+                        ->label('Saldo')
+                        ->required()
+                    ,
+                    Forms\Components\Select::make('posisi')
+                        ->options([
+                            'debit' => 'Debit',
+                            'kredit' => 'Kredit',
+                        ])
+                        ->default('debit')
+                        ->required()
+                        ->label('Posisi')
                 ]),
             ]);
     }
@@ -63,7 +80,18 @@ class CoaResource extends Resource
                 TextColumn::make('nama_akun')
                     ->label('Nama')
                     ->searchable(),
-
+                TextColumn::make('saldo')
+                    ->formatStateUsing(fn ($state) => 'Rp. ' . number_format($state, 0, ',', '.'))
+                    ->label('Saldo')
+                    ->sortable(),
+                TextColumn::make('posisi')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'debit' => 'success',
+                        'kredit' => 'danger',
+                    })
+                    ->label('Posisi')
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('header_akun')

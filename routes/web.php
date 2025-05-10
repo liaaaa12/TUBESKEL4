@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BarangKonsinyasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PDFController;
 
 Route::resource('barang_konsinyasi', BarangKonsinyasiController::class);
 
@@ -25,3 +26,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ubahpassword', [AuthController::class, 'ubahpassword'])->name('password.change');
     Route::post('/ubahpassword', [AuthController::class, 'prosesubahpassword'])->name('password.change');
 });
+
+// Route untuk export PDF pembelian barang
+Route::get('/export-pembelian-barang', [PDFController::class, 'exportPembelianBarang']);

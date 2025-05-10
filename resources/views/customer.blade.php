@@ -155,12 +155,13 @@
                     @foreach($barangs as $barang)
                     <div class="col">
                         <div class="card h-100">
-                            <img src="{{ $barang->gambar ?? 'https://via.placeholder.com/300x200' }}" 
+                            <img src="{{ $barang->foto ? asset('storage/' . $barang->foto) : ($barang->gambar ? asset('storage/' . $barang->gambar) : 'https://via.placeholder.com/300x200') }}" 
                                  class="card-img-top" 
-                                 alt="{{ $barang->nama_barang }}">
+                                 alt="{{ $barang->nama_barang }}"
+                                 style="height: 200px; object-fit: cover;">
                             <div class="card-body">
                                 <h5 class="product-title">{{ $barang->nama_barang }}</h5>
-                                <p class="product-price mb-3">Rp {{ number_format($barang->harga_jual, 0, ',', '.') }}</p>
+                                <p class="product-price mb-3">Rp {{ number_format($barang->harga ?? $barang->harga_barang, 0, ',', '.') }}</p>
                                 <div class="quantity-control mb-3">
                                     <button class="quantity-btn" onclick="decrementQuantity({{ $barang->id }})">-</button>
                                     <input type="number" 
@@ -173,7 +174,7 @@
                                     <button class="quantity-btn" onclick="incrementQuantity({{ $barang->id }}, {{ $barang->stok }})">+</button>
                                 </div>
                                 <button class="btn btn-add-cart w-100" 
-                                        onclick="addToCart({{ $barang->id }}, {{ $barang->harga_jual }})">
+                                        onclick="addToCart({{ $barang->id }}, {{ $barang->harga ?? $barang->harga_barang }})">
                                     <i class="bi bi-cart-plus"></i> Tambah ke Keranjang
                                 </button>
                             </div>

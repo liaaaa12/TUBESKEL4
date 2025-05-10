@@ -12,4 +12,12 @@ class Coa extends Model
     protected $table = 'coa'; 
 
     protected $guarded = [];
+
+    protected $fillable = [
+        'kode_akun',
+        'nama_akun',
+        'header_akun',
+        'saldo',
+        'posisi'
+    ];
 }

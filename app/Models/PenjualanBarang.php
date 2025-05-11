@@ -10,20 +10,35 @@ class PenjualanBarang extends Model
     use HasFactory;
 
     protected $table = 'penjualan_barang';
-    protected $fillable = ['penjualan_id', 'Kode_barang', 'harga_beli', 'harga_jual', 'jml', 'tgl'];
+    
+    // Menyesuaikan dengan struktur tabel yang ada
+    protected $fillable = [
+        'penjualan_id',
+        'tgl',
+        'Kode_barang',
+        'kode_barang_konsinyasi',
+        'harga_beli',
+        'harga_jual',
+        'subtotal',
+        'jml'
+    ];
 
+    // Timestamps enabled by default in Laravel
+    public $timestamps = true;
+
+    // Relationships
     public function penjualan()
     {
         return $this->belongsTo(Penjualan::class, 'penjualan_id');
     }
-
+    
     public function barang()
     {
         return $this->belongsTo(Barang::class, 'Kode_barang');
     }
-
+    
     public function barang_konsinyasi()
     {
-        return $this->belongsTo(Barang::class, 'kode_barang_konsinyasi');
+        return $this->belongsTo(BarangKonsinyasi::class, 'kode_barang_konsinyasi');
     }
 }

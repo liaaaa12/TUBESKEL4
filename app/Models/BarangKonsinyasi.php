@@ -34,4 +34,16 @@ class BarangKonsinyasi extends Model
         $noakhir = 'BKS-' . str_pad($noakhir, 3, "0", STR_PAD_LEFT);
         return $noakhir;
     }
+    public function setHargaBarangAttribute($value)
+    {
+        // Hapus koma (,) dari nilai sebelum menyimpannya ke database
+        $this->attributes['harga_barang'] = str_replace(',', '', $value);
+    }
+
+    // Relasi dengan tabel relasi many to many nya
+    public function penjualanBarang()
+    {
+        return $this->hasMany(PenjualanBarang::class, 'kode_barang_konsinyasi');
+    }
+
 }

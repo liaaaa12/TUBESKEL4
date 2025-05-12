@@ -18,8 +18,8 @@ class CustomerMiddleware
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Cek apakah role user adalah customer
-        if (Auth::user()->role !== 'customer') {
+        // Cek apakah user_group adalah customer
+        if (Auth::user()->user_group !== 'customer') {
             return redirect('/')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
 

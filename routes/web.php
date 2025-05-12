@@ -5,7 +5,6 @@ use App\Http\Controllers\BarangKonsinyasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PDFController;
-use App\Http\Controllers\PembayaranKonsignorController;
 use App\Http\Controllers\KeranjangController;
 
 // Admin Routes (Protected)
@@ -65,10 +64,6 @@ Route::middleware(['auth', 'customer'])->group(function () {
     // Password Change Routes
     Route::get('/ubahpassword', [AuthController::class, 'ubahpassword'])->name('password.change');
     Route::post('/ubahpassword', [AuthController::class, 'prosesubahpassword'])->name('password.change');
-
-    // Consignor Payment Routes
-    Route::get('/pembayaran-konsignor/get-barang-konsinyasi/{konsignorId}', [PembayaranKonsignorController::class, 'getBarangKonsinyasi']);
-    Route::resource('pembayaran-konsignor', PembayaranKonsignorController::class);
 
     // Cart Routes
     Route::get('/keranjang', function () {

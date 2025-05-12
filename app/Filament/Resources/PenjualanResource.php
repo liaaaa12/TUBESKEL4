@@ -238,7 +238,6 @@ class PenjualanResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'bayar' => 'success',
                         'pesan' => 'warning',
-                        'batal' => 'danger',
                     }),
                 TextColumn::make('tagihan')
                     ->formatStateUsing(fn (string|int|null $state): string => rupiah($state))

@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangKonsinyasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\PembayaranKonsignorController;
 
 Route::resource('barang_konsinyasi', BarangKonsinyasiController::class);
 
@@ -25,6 +26,10 @@ Route::middleware(['auth'])->group(function () {
     // Password Change Routes
     Route::get('/ubahpassword', [AuthController::class, 'ubahpassword'])->name('password.change');
     Route::post('/ubahpassword', [AuthController::class, 'prosesubahpassword'])->name('password.change');
+
+    // Consignor Payment Routes
+    Route::get('/pembayaran-konsignor/get-barang-konsinyasi/{konsignorId}', [PembayaranKonsignorController::class, 'getBarangKonsinyasi']);
+    Route::resource('pembayaran-konsignor', PembayaranKonsignorController::class);
 });
 
 // Route untuk export PDF pembelian barang

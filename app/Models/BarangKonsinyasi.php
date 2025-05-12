@@ -17,7 +17,7 @@ class BarangKonsinyasi extends Model
         'foto',
         'stok',
         'harga',
-        'pemilik'
+        'id_konsignor'
     ];
 
     public static function getKodeBarangKonsinyasi()
@@ -46,4 +46,13 @@ class BarangKonsinyasi extends Model
         return $this->hasMany(PenjualanBarang::class, 'kode_barang_konsinyasi');
     }
 
+    public function konsignor()
+    {
+        return $this->belongsTo(Konsignor::class, 'id_konsignor');
+    }
+
+    public function detailPembayaranKonsinyors()
+    {
+        return $this->hasMany(DetailPembayaranKonsignor::class, 'kode_barang_konsinyasi', 'id');
+    }
 }

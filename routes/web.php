@@ -29,3 +29,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Route untuk export PDF pembelian barang
 Route::get('/export-pembelian-barang', [PDFController::class, 'exportPembelianBarang']);
+
+// proses pengiriman email
+use App\Http\Controllers\PengirimanEmailController;
+Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 'proses_kirim_email_pembayaran']);

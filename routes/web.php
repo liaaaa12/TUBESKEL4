@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangKonsinyasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\PengirimanEmailPembelianController;
 
 Route::resource('barang_konsinyasi', BarangKonsinyasiController::class);
 
@@ -29,3 +30,6 @@ Route::middleware(['auth'])->group(function () {
 
 // Route untuk export PDF pembelian barang
 Route::get('/export-pembelian-barang', [PDFController::class, 'exportPembelianBarang']);
+
+// proses pengiriman email pembelian barang
+Route::get('/proses_kirim_email_pembelian', [PengirimanEmailPembelianController::class, 'proses_kirim_email_pembelian']);

@@ -12,10 +12,22 @@ class CustomerController extends Controller
     {
         // Ambil data barang konsinyasi
         $barangKonsinyasi = BarangKonsinyasi::where('stok', '>', 0)->get();
-        
+        // Set harga jual konsinyasi
+        foreach ($barangKonsinyasi as $bk) {
+            $bk->kode_unik = $bk->kode_barang_konsinyasi;
+            $bk->harga_jual = $bk->harga * 1.2;
+            $bk->tipe = 'konsinyasi';
+        }
+
         // Ambil data barang biasa
         $barangBiasa = Barang::where('stok', '>', 0)->get();
-        
+        // Set harga jual barang biasa
+        foreach ($barangBiasa as $bb) {
+            $bb->kode_unik = $bb->Kode_barang;
+            $bb->harga_jual = $bb->harga_barang * 1.2;
+            $bb->tipe = 'biasa';
+        }
+
         // Gabungkan data
         $barangs = $barangKonsinyasi->concat($barangBiasa);
         

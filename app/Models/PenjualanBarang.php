@@ -39,6 +39,14 @@ class PenjualanBarang extends Model
     
     public function barang_konsinyasi()
     {
-        return $this->belongsTo(BarangKonsinyasi::class, 'kode_barang_konsinyasi');
+        return $this->belongsTo(\App\Models\BarangKonsinyasi::class, 'kode_barang_konsinyasi');
+    }
+
+    public function detailPembayaranKonsignor()
+    {
+        return $this->hasMany(DetailPembayaranKonsignor::class, 'penjualan_barang_id')
+            ->whereHas('pembayaranKonsignor', function ($query) {
+                $query->whereNotNull('id');
+            });
     }
 }

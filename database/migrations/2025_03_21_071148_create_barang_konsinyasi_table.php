@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->string('foto')->nullable();
             $table->integer('stok');
             $table->decimal('harga', 10, 2);
-            $table->string('pemilik');
+            $table->string('pemilik')->nullable();
             $table->timestamps();
         });
     }

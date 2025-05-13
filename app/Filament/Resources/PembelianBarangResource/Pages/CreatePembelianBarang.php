@@ -8,7 +8,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Mail\InvoiceMail;
+use App\Mail\InvoiceMailPembelian;
 use App\Models\VendorBarang;
 
 class CreatePembelianBarang extends CreateRecord
@@ -46,9 +46,9 @@ class CreatePembelianBarang extends CreateRecord
         ];
 
         // Generate PDF invoice (gunakan view emails/invoice)
-        $pdf = Pdf::loadView('emails.invoice', ['data' => $data]);
+        $pdf = Pdf::loadView('emails.invoicePembelian', ['data' => $data]);
 
         // Kirim email ke Mailtrap (gunakan email dummy)
-        Mail::to('test@mailtrap.io')->send(new InvoiceMail($data, $pdf->output()));
+        Mail::to('test@mailtrap.io')->send(new InvoiceMailPembelian($data, $pdf->output()));
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Attachment;
 
-class InvoiceMail extends Mailable
+class InvoiceMailPembelian extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -42,7 +42,7 @@ class InvoiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.invoice',
+            view: 'emails.invoicePembelian',
             with: [
                 'data' => $this->data,
             ],

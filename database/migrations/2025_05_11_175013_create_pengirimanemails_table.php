@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('pengirimanemail', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('user_group')->default('customer');
-            $table->rememberToken();
+            $table->foreignId('penjualan_id')->constrained('penjualan')->onDelete('cascade');
+            $table->string('status')->nullable();
+            $table->dateTime('tgl_pengiriman_pesan')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('pengirimanemail');
     }
 };

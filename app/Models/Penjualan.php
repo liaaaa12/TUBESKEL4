@@ -5,46 +5,75 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// untuk tambahan db
-use Illuminate\Support\Facades\DB;
-
 class Penjualan extends Model
 {
     use HasFactory;
 
-    protected $table = 'penjualan'; // Nama tabel eksplisit
+    protected $table = 'penjualan';
+    
+    protected $fillable = [
+        'no_faktur',
+        'tanggal_faktur',
+        'pembeli_id',
+        'tagihan',
+        
+        'status'
+    ];
 
-    protected $guarded = [];
-
+    /**
+     * Generate kode faktur otomatis
+     */
     public static function getKodeFaktur()
     {
-        // query kode perusahaan
-        $sql = "SELECT IFNULL(MAX(no_faktur), 'F-0000000') as no_faktur 
-                FROM penjualan ";
-        $kodefaktur = DB::select($sql);
-
-        // cacah hasilnya
-        foreach ($kodefaktur as $kdpmbl) {
-            $kd = $kdpmbl->no_faktur;
+        $prefix = 'FKT-';
+        $date = now()->format('Ymd');
+        
+        $lastKode = self::where('no_faktur', 'like', $prefix . $date . '%')
+            ->orderBy('no_faktur', 'desc')
+            ->first();
+            
+        if (!$lastKode) {
+            $number = '0001';
+        } else {
+            $lastNumber = intval(substr($lastKode->no_faktur, -4));
+            $number = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         }
-        // Mengambil substring tiga digit akhir dari string PR-000
-        $noawal = substr($kd,-7);
-        $noakhir = $noawal+1; //menambahkan 1, hasilnya adalah integer cth 1
-        $noakhir = 'F-'.str_pad($noakhir,7,"0",STR_PAD_LEFT); //menyambung dengan string P-00001
-        return $noakhir;
-
+        
+        return $prefix . $date . $number;
     }
 
-    // relasi ke tabel pembeli
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($penjualan) {
+        if (empty($penjualan->tgl)) {
+            $penjualan->tgl = now(); // atau Carbon::today() kalo hanya tanggal
+        }
+    });
+}
+
+    /**
+     * Relasi ke pembeli
+     */
     public function pembeli()
     {
         return $this->belongsTo(Pembeli::class, 'pembeli_id');
     }
 
-    // relasi ke tabel penjualan barang
+    /**
+     * Relasi ke detail penjualan barang
+     */
     public function penjualanBarang()
     {
         return $this->hasMany(PenjualanBarang::class, 'penjualan_id');
     }
-
+    
+    /**
+     * Relasi ke pembayaran
+     */
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class, 'penjualan_id');
+    }
 }

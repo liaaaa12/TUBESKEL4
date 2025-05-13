@@ -39,6 +39,11 @@ class KonsignorResource extends Resource
                     ->label('Nama')
                     ->required()
                     ->maxLength(255),
+                    
+                TextInput::make('email')
+                ->label('Nama')
+                ->required()
+                ->maxLength(255),
 
                 Textarea::make('alamat')
                     ->label('Alamat')
@@ -67,6 +72,11 @@ class KonsignorResource extends Resource
                     ->sortable()
                     ->searchable(),
 
+                    TextColumn::make('email')
+                    ->label('Nama')
+                    ->sortable()
+                    ->searchable(),
+                    
                 TextColumn::make('alamat')
                     ->label('Alamat')
                     ->limit(50),

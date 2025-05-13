@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BarangKonsinyasiResource\Pages;
 use App\Models\BarangKonsinyasi;
+use App\Models\Konsignor;  // Added this import
 use Filament\Resources\Resource;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;  // Changed this import
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Actions\EditAction;
@@ -46,9 +48,12 @@ class BarangKonsinyasiResource extends Resource
                     ->label('Harga')
                     ->numeric()
                     ->required(),
-                TextInput::make('pemilik')
+                Select::make('id_konsignor')  // Changed field name to match migration
                     ->label('Pemilik')
-                    ->required(),
+                    ->options(Konsignor::pluck('nama', 'id')->toArray())  // Changed model
+                    ->required()
+                    ->placeholder('Pilih Pemilik')
+                    ->searchable(),  // Added searchable for better UX
             ]);
     }
 
@@ -65,7 +70,7 @@ class BarangKonsinyasiResource extends Resource
                     ->size(40),
                 TextColumn::make('stok')->label('Stok')->sortable(),
                 TextColumn::make('harga')->label('Harga')->sortable(),
-                TextColumn::make('pemilik')->label('Pemilik')->sortable(),
+                TextColumn::make('konsignor.nama')->label('Pemilik')->sortable(),  // Updated to use relationship
             ])
             ->actions([
                 EditAction::make(),

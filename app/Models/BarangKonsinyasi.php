@@ -17,7 +17,7 @@ class BarangKonsinyasi extends Model
         'foto',
         'stok',
         'harga',
-        'pemilik'
+        'id_konsignor'
     ];
 
     public static function getKodeBarangKonsinyasi()
@@ -33,5 +33,26 @@ class BarangKonsinyasi extends Model
         $noakhir = $noawal + 1;
         $noakhir = 'BKS-' . str_pad($noakhir, 3, "0", STR_PAD_LEFT);
         return $noakhir;
+    }
+    public function setHargaBarangAttribute($value)
+    {
+        // Hapus koma (,) dari nilai sebelum menyimpannya ke database
+        $this->attributes['harga_barang'] = str_replace(',', '', $value);
+    }
+
+    // Relasi dengan tabel relasi many to many nya
+    public function penjualanBarang()
+    {
+        return $this->hasMany(PenjualanBarang::class, 'kode_barang_konsinyasi');
+    }
+
+    public function konsignor()
+    {
+        return $this->belongsTo(Konsignor::class, 'id_konsignor');
+    }
+
+    public function detailPembayaranKonsinyors()
+    {
+        return $this->hasMany(DetailPembayaranKonsignor::class, 'kode_barang_konsinyasi', 'id');
     }
 }

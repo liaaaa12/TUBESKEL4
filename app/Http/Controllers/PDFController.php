@@ -11,7 +11,14 @@ class PDFController extends Controller
     // export pembelian barang
     public function exportPembelianBarang()
     {
-        $data = PembelianBarang::with(['vendorBarang', 'barang'])->get()->map(function($item) {
+        // Ambil data asli dari database
+        $rawData = PembelianBarang::with(['vendorBarang', 'barang'])->get();
+
+        // Hitung grand total dari data asli
+        $grandTotal = $rawData->sum('total');
+
+        // Mapping data untuk keperluan tampilan
+        $data = $rawData->map(function($item) {
             return [
                 'vendor' => $item->vendorBarang->nama_vndr_brg ?? '-',
                 'barang' => $item->barang->nama_barang ?? '-',
@@ -22,7 +29,8 @@ class PDFController extends Controller
             ];
         });
 
-        $pdf = Pdf::loadView('pdf.contoh', ['data' => $data]);
+        // Kirim data dan grandTotal ke view
+        $pdf = Pdf::loadView('pdf.contoh', ['data' => $data, 'grandTotal' => $grandTotal]);
         return $pdf->download('pembelian-barang.pdf');
     }
 }

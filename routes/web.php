@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\PengirimanEmailPembelianController;
+
 
 // Admin Routes (Protected)
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -77,3 +79,5 @@ Route::get('/export-pembelian-barang', [PDFController::class, 'exportPembelianBa
 use App\Http\Controllers\PengirimanEmailController;
 Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 'proses_kirim_email_pembayaran']);
 
+// proses pengiriman email pembelian barang
+Route::get('/proses_kirim_email_pembelian', [PengirimanEmailPembelianController::class, 'proses_kirim_email_pembelian']);

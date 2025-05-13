@@ -41,5 +41,7 @@
             @endforeach
         </tbody>
     </table>
+    <br>
+    <h3>Grand Total: Rp {{ number_format($grandTotal, 2, ',', '.') }}</h3>
 </body>
 </html> 

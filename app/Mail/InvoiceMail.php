@@ -9,18 +9,29 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TesMail extends Mailable
+// tambahan
+use Illuminate\Mail\Mailables\Attachment;
+
+class InvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $userName;
+    // tambahan untuk data dan konten pdf
+    public $data;
+    public $pdfContent;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($userName)
+    // public function __construct()
+    // {
+    //     //
+    // }
+
+    public function __construct($data, $pdfContent)
     {
-        $this->userName = $userName;
+        $this->data = $data;
+        $this->pdfContent = $pdfContent;
     }
 
     /**
@@ -29,7 +40,7 @@ class TesMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tes Mail',
+            subject: 'Invoice Pembayaran MP Mart',
         );
     }
 
@@ -39,7 +50,10 @@ class TesMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.welcome',
+            view: 'emails.invoice',
+            with: [
+                'data' => $this->data,
+            ],
         );
     }
 
@@ -50,6 +64,10 @@ class TesMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            // tambahkan pemrosesan attachment
+            Attachment::fromData(fn () => $this->pdfContent, 'invoice.pdf')
+            ->withMime('application/pdf'),
+        ];
     }
 }

@@ -190,9 +190,7 @@ class PembayaranKonsignorResource extends Resource
                     ->money('IDR')
                     ->sortable()
                     ->label('Total'),
-                Tables\Columns\TextColumn::make('keterangan')
-                    ->limit(50)
-                    ->label('Keterangan'),
+                
             ])
             ->filters([
                 //

@@ -65,7 +65,6 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/ubahpassword', [AuthController::class, 'ubahpassword'])->name('password.change');
     Route::post('/ubahpassword', [AuthController::class, 'prosesubahpassword'])->name('password.change');
 
-    // Cart Routes
     Route::get('/keranjang', function () {
         return view('keranjang');
     })->name('keranjang');

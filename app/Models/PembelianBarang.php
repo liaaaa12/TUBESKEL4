@@ -14,6 +14,7 @@ class PembelianBarang extends Model
         'stok',
         'harga',
         'total',
+        'keterangan',
     ];
 
     public function vendorBarang()

@@ -29,6 +29,7 @@ class PembelianBarangResource extends Resource
     protected static ?string $navigationLabel = 'Pembelian Barang';
     protected static ?string $slug = 'pembelian-barang';
     protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Transaksi';
 
     public static function form(Form $form): Form
     {
@@ -71,6 +72,13 @@ class PembelianBarangResource extends Resource
                     ) {
                         $set('total', (int) $get('stok') * (int) $get('harga'));
                     }),
+                Forms\Components\Select::make('keterangan')
+                    ->label('Keterangan')
+                    ->options([
+                        'lunas' => 'Lunas',
+                        'belum lunas' => 'Belum Lunas',
+                    ])
+                    ->required(),
             ]);
     }
 
@@ -96,6 +104,11 @@ class PembelianBarangResource extends Resource
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')
                     ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 2, ',', '.'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('keterangan')
+                    ->label('Keterangan')
+                    ->badge()
+                    ->color(fn($state) => $state === 'lunas' ? 'success' : 'warning')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Tanggal Pembelian')
@@ -129,7 +142,8 @@ class PembelianBarangResource extends Resource
                                 'tanggal' => $item->created_at ? $item->created_at->format('d M Y H:i') : '-',
                             ];
                         });
-                        $pdf = Pdf::loadView('pdf.contoh', ['data' => $data]);
+                        $grandTotal = $data->sum('total');
+                        $pdf = Pdf::loadView('pdf.contoh', ['data' => $data, 'grandTotal' => $grandTotal]);
                         return response()->streamDownload(
                             fn () => print($pdf->output()),
                             'pembelian-barang.pdf'

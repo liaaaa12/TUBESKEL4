@@ -70,9 +70,10 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/keranjang', function () {
         return view('keranjang');
     })->name('keranjang');
-<<<<<<< HEAD
-});
-=======
+<
+    // Transaction History Route
+    Route::get('/riwayat-transaksi', [KeranjangController::class, 'riwayatTransaksi'])->name('riwayat.transaksi');
+
 });
 
 // Route untuk export PDF pembelian barang
@@ -84,4 +85,4 @@ Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 
 
 // proses pengiriman email pembelian barang
 Route::get('/proses_kirim_email_pembelian', [PengirimanEmailPembelianController::class, 'proses_kirim_email_pembelian']);
->>>>>>> 1cbaedc7a8017f5010dc439ec4cc1f781f374f35
+

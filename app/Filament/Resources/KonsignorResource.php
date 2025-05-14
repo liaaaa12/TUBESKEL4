@@ -41,7 +41,7 @@ class KonsignorResource extends Resource
                     ->maxLength(255),
                     
                 TextInput::make('email')
-                ->label('Nama')
+                ->label('Email')
                 ->required()
                 ->maxLength(255),
 
@@ -73,7 +73,7 @@ class KonsignorResource extends Resource
                     ->searchable(),
 
                     TextColumn::make('email')
-                    ->label('Nama')
+                    ->label('Email')
                     ->sortable()
                     ->searchable(),
                     

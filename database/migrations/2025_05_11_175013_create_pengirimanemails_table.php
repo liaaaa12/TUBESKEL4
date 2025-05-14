@@ -9,17 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+ public function up(): void
+{
+    if (!Schema::hasTable('pengirimanemail')) {
         Schema::create('pengirimanemail', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('penjualan_id')->constrained('penjualan')->onDelete('cascade');
+            $table->foreignId('penjualan_id')->constrained('penjualan');
             $table->string('status')->nullable();
             $table->dateTime('tgl_pengiriman_pesan')->nullable();
             $table->timestamps();
         });
     }
-
+} 
     /**
      * Reverse the migrations.
      */

@@ -1,8 +1,8 @@
 <h2>Invoice: {{ $data['invoice_number'] }}</h2>
 <p>Halo {{ $data['vendor_name'] }},</p>
-<p>Invoice pembelian barang Anda terlampir dalam email ini.</p>
-<p>Terima kasih telah melakukan pembelian di toko kami.</p>
-<p>Silahkan cek detail transaksi pembelian barang Anda di bawah ini:</p>
+<p>Invoice pembelian barang Kami terlampir dalam email ini.</p>
+<p>Terima kasih telah melakukan Transaksi pembelian barang dengan toko kami.</p>
+<p>Silahkan cek detail transaksi pembelian barang Kami di bawah ini:</p>
 
 <ul>
     <li><strong>Tanggal:</strong> {{ $data['invoice_date'] }}</li>

@@ -95,6 +95,127 @@
         // Get cart data from localStorage
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let cartTotal = 0;
+        let currentOrderId = null;
+        let snapToken = null;
+        let isCheckingStatus = false;
+
+        // Add event listener for Midtrans callback
+        window.addEventListener('message', function(event) {
+            console.log('Message received:', event.data);
+            // Handle both closeEvent and specific close message from Midtrans
+            if (event.data === 'closeEvent' || 
+                (typeof event.data === 'object' && event.data.code === '200' && event.data.action === 'close')) {
+                handleMerchantReturn();
+            }
+        });
+
+        function handleMerchantReturn() {
+            if (!currentOrderId) {
+                window.location.href = "{{ route('customer') }}";
+                return;
+            }
+
+            // Force cancel the transaction
+            fetch(`/payment/status/${currentOrderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    force_cancel: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Transaction cancelled:', data);
+                localStorage.removeItem('cart');
+                window.location.href = "{{ route('customer') }}";
+            })
+            .catch(error => {
+                console.error('Error cancelling transaction:', error);
+                window.location.href = "{{ route('customer') }}";
+            });
+        }
+
+        function openPaymentPopup() {
+            if (!snapToken) {
+                console.error('No snap token available');
+                window.location.href = "{{ route('customer') }}";
+                return;
+            }
+
+            window.snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    console.log('Payment success:', result);
+                    handleSuccessfulPayment(result);
+                },
+                onPending: function(result) {
+                    console.log('Payment pending:', result);
+                    handlePendingPayment(result);
+                },
+                onError: function(result) {
+                    console.error('Payment error:', result);
+                    handleFailedPayment(result);
+                },
+                onClose: function() {
+                    console.log('Customer closed the popup without finishing the payment');
+                    handleMerchantReturn();
+                }
+            });
+        }
+
+        function handleFailedPayment(result) {
+            alert('Pembayaran gagal! Silakan coba lagi.');
+            handleMerchantReturn();
+        }
+
+        function startPaymentStatusCheck(orderId) {
+            if (!orderId) return;
+            
+            console.log('Starting payment status check for order:', orderId);
+            currentOrderId = orderId;
+            
+            const interval = setInterval(() => {
+                if (isCheckingStatus) return;
+                
+                fetch(`/payment/check-status-pg`)
+                    .then(response => response.json())
+                    .then(checkResult => {
+                        console.log('Global status check result:', checkResult);
+                        return fetch(`/payment/status/${orderId}`);
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Order status:', data);
+                        
+                        if (data.redirect) {
+                            clearInterval(interval);
+                            window.location.href = data.redirect;
+                            return;
+                        }
+
+                        if (data.status === 'bayar') {
+                            clearInterval(interval);
+                            localStorage.removeItem('cart');
+                            window.location.href = "{{ route('customer') }}";
+                        } else if (data.status === 'batal' || 
+                                  data.payment_status === 'expired' || 
+                                  data.transaction_status === 'expire' || 
+                                  data.transaction_status === 'cancel' || 
+                                  data.transaction_status === 'deny') {
+                            clearInterval(interval);
+                            localStorage.removeItem('cart');
+                            window.location.href = "{{ route('customer') }}";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking payment status:', error);
+                        clearInterval(interval);
+                        window.location.href = "{{ route('customer') }}";
+                    });
+            }, 5000);
+        }
 
         // Display cart items
         function displayCart() {
@@ -156,12 +277,16 @@
                 return;
             }
 
+            document.getElementById('pay-button').disabled = true;
+            document.getElementById('pay-button').innerHTML = 'Memproses...';
+
             // Send cart data to server to create transaction
             fetch('{{ route("payment.create") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify({
                     cart_data: JSON.stringify(cart)
@@ -177,35 +302,9 @@
             })
             .then(data => {
                 if (data.snap_token) {
-                    // Open Midtrans payment popup
-                    window.snap.pay(data.snap_token, {
-                        onSuccess: function(result) {
-                            console.log('Payment success:', result);
-                            localStorage.removeItem('cart');
-                            // Open autorefresh in new window/tab with order_id
-                            window.open("{{ route('payment.autorefresh_penjualan') }}?order_id=" + result.order_id, "_blank");
-                            // Redirect main window after short delay
-                            setTimeout(() => {
-                                window.location.href = "{{ route('customer') }}";
-                            }, 2000);
-                        },
-                        onPending: function(result) {
-                            console.log('Payment pending:', result);
-                            alert('Pembayaran pending! Silakan selesaikan pembayaran Anda.');
-                            // Open autorefresh in new window/tab with order_id
-                            window.open("{{ route('payment.autorefresh_penjualan') }}?order_id=" + result.order_id, "_blank");
-                        },
-                        onError: function(result) {
-                            console.error('Payment error:', result);
-                            alert('Pembayaran gagal! Silakan coba lagi.');
-                            document.getElementById('pay-button').disabled = false;
-                            document.getElementById('pay-button').innerHTML = 'Bayar Sekarang';
-                        },
-                        onClose: function() {
-                            document.getElementById('pay-button').disabled = false;
-                            document.getElementById('pay-button').innerHTML = 'Bayar Sekarang';
-                        }
-                    });
+                    snapToken = data.snap_token;
+                    currentOrderId = data.order_id;
+                    openPaymentPopup();
                 } else {
                     throw new Error(data.message || 'Terjadi kesalahan saat memproses pembayaran');
                 }
@@ -218,38 +317,21 @@
             });
         }
 
-        function startPaymentStatusCheck(orderId) {
-            console.log('Starting payment status check for order:', orderId);
-            
-            // Check every 5 seconds
-            const interval = setInterval(() => {
-                // Check payment status
-                fetch(`/payment/check-status-pg`)
-                    .then(response => response.json())
-                    .then(checkResult => {
-                        console.log('Global status check result:', checkResult);
-                        
-                        // Check specific order status
-                        return fetch(`/payment/status/${orderId}`);
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Order status:', data);
-                        if (data.status === 'bayar') {
-                            clearInterval(interval);
-                            localStorage.removeItem('cart');
-                            window.location.href = "{{ route('customer') }}";
-                        } else if (data.status === 'batal') {
-                            clearInterval(interval);
-                            alert('Pembayaran dibatalkan.');
-                            document.getElementById('pay-button').disabled = false;
-                            document.getElementById('pay-button').innerHTML = 'Bayar Sekarang';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error checking payment status:', error);
-                    });
-            }, 5000);
+        function handleSuccessfulPayment(result) {
+            localStorage.removeItem('cart');
+            // Open autorefresh in new window/tab with order_id
+            window.open("{{ route('payment.autorefresh_penjualan') }}?order_id=" + result.order_id, "_blank");
+            // Redirect main window after short delay
+            setTimeout(() => {
+                window.location.href = "{{ route('customer') }}";
+            }, 2000);
+        }
+
+        function handlePendingPayment(result) {
+            alert('Pembayaran pending! Silakan selesaikan pembayaran Anda.');
+            // Open autorefresh in new window/tab with order_id
+            window.open("{{ route('payment.autorefresh_penjualan') }}?order_id=" + result.order_id, "_blank");
+            startPaymentStatusCheck(result.order_id);
         }
 
         // Initial display

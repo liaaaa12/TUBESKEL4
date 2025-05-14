@@ -68,6 +68,9 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/keranjang', function () {
         return view('keranjang');
     })->name('keranjang');
+
+    // Transaction History Route
+    Route::get('/riwayat-transaksi', [KeranjangController::class, 'riwayatTransaksi'])->name('riwayat.transaksi');
 });
 
 // Route untuk export PDF pembelian barang
@@ -77,3 +80,4 @@ Route::get('/export-pembelian-barang', [PDFController::class, 'exportPembelianBa
 use App\Http\Controllers\PengirimanEmailController;
 Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 'proses_kirim_email_pembayaran']);
 
+    

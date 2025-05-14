@@ -40,13 +40,7 @@ Route::middleware(['auth', 'customer'])->group(function () {
         return view('keranjang');
     })->name('keranjang');
 
-    // Proses Pengiriman Email
-    Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 'proses_kirim_email_pembayaran']);
-    Route::get('/proses_kirim_email_pembelian', [PengirimanEmailPembelianController::class, 'proses_kirim_email_pembelian']);
-
-    // Cek Status Pembayaran
-    Route::get('/cek_status_pembayaran_pg', [KeranjangController::class, 'cek_status_pembayaran_pg']);
-});
+  });
 
 // Payment & Midtrans Routes
 Route::post('/payment/callback', [KeranjangController::class, 'handleCallback'])->name('payment.callback');
@@ -76,4 +70,10 @@ Route::get('/penjualan/export-pdf', function () {
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.penjualan', compact('penjualan'));
     return $pdf->download('penjualan.pdf');
 });
+  // Proses Pengiriman Email
+    Route::get('/proses_kirim_email_pembayaran', [PengirimanEmailController::class, 'proses_kirim_email_pembayaran']);
+    Route::get('/proses_kirim_email_pembelian', [PengirimanEmailPembelianController::class, 'proses_kirim_email_pembelian']);
+
+    // Cek Status Pembayaran
+    Route::get('/cek_status_pembayaran_pg', [KeranjangController::class, 'cek_status_pembayaran_pg']);
 

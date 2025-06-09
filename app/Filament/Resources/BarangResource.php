@@ -33,7 +33,7 @@ class BarangResource extends Resource
         return $form
             ->schema([
                 TextInput::make('Kode_barang')
-                    ->default(fn () => Barang::getKodeBarang()) // Ambil default dari method getKodeBarang
+                    ->default(fn() => Barang::getKodeBarang()) // Ambil default dari method getKodeBarang
                     ->label('Id Barang')
                     ->required()
                     ->readonly() // Membuat field menjadi read-only
@@ -44,25 +44,27 @@ class BarangResource extends Resource
                 ,
                 TextInput::make('harga_barang')
                     ->required()
-                    ->minValue(0) // Nilai minimal 0 (opsional jika tidak ingin ada harga negatif)
-                    ->reactive() // Menjadikan input reaktif terhadap perubahan
-                    ->extraAttributes(['id' => 'harga-barang']) // Tambahkan ID untuk pengikatan JavaScript
-                    ->placeholder('Masukkan harga barang') // Placeholder untuk membantu pengguna
+                    ->reactive()
+                    ->extraAttributes(['id' => 'harga-barang'])
+                    ->placeholder('Masukkan harga barang')
                     ->live()
-                    ->afterStateUpdated(fn ($state, callable $set) => 
+                    ->afterStateUpdated(
+                        fn($state, callable $set) =>
                         $set('harga_barang', number_format((int) str_replace('.', '', $state), 0, ',', '.'))
-                      )
-                ,
+                    )
+                    ->dehydrateStateUsing(
+                        fn($state) =>
+                        (int) str_replace('.', '', $state) // Ubah kembali ke angka sebelum disimpan
+                    )
+                    ->numeric(),
                 FileUpload::make('foto')
                     ->directory('foto')
-                    ->required()
-                ,
+                    ->required(),
                 TextInput::make('stok')
                     ->required()
                     ->placeholder('Masukkan stok barang') // Placeholder untuk membantu pengguna
-                    ->minValue(0)
-                ,
-                
+                    ->minValue(0),
+
             ]);
     }
 
@@ -78,14 +80,13 @@ class BarangResource extends Resource
                     ->sortable(),
                 TextColumn::make('harga_barang')
                     ->label('Harga Barang')
-                    ->formatStateUsing(fn ($state) => rupiah($state))
+                    ->formatStateUsing(fn($state) => rupiah($state))
 
                     ->extraAttributes(['class' => 'text-right']) // Tambahkan kelas CSS untuk rata kanan
-                    ->sortable()
-                ,
+                    ->sortable(),
                 ImageColumn::make('foto'),
                 TextColumn::make('stok'),
-            
+
             ])
             ->filters([
                 //

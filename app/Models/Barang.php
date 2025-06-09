@@ -25,7 +25,7 @@ class Barang extends Model
 
         // cacah hasilnya
         foreach ($kodebarang as $kdbrg) {
-            $kd = $kdbrg->kode_barang;
+            $kd = $kdbrg->Kode_barang;
         }
         // Mengambil substring tiga digit akhir dari string PR-000
         $noawal = substr($kd,-3);

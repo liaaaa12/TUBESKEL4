@@ -9,7 +9,7 @@ class Pengirimanemail extends Model
 {
     use HasFactory;
 
-    protected $table = 'pembelian_barangs'; // Nama tabel sesuai database
+    protected $table = 'pengirimanemail'; // Nama tabel sesuai database
 
     protected $guarded = []; // Semua kolom boleh diisi
 

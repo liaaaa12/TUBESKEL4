@@ -70,7 +70,7 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::get('/keranjang', function () {
         return view('keranjang');
     })->name('keranjang');
-<
+
     // Transaction History Route
     Route::get('/riwayat-transaksi', [KeranjangController::class, 'riwayatTransaksi'])->name('riwayat.transaksi');
 

@@ -170,6 +170,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('riwayat.transaksi') }}" onclick="window.location.href='{{ route('riwayat.transaksi') }}'">
+                            <i class="bi bi-clock-history"></i> Riwayat Transaksi
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('password.change') }}">
                             <i class="bi bi-key"></i> Ubah Password
                         </a>

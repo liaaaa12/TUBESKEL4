@@ -19,10 +19,12 @@ use Filament\Tables\Actions\DeleteAction;
 class BarangKonsinyasiResource extends Resource
 {
     protected static ?string $model = BarangKonsinyasi::class;
-    protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $navigationLabel = 'Barang Konsinyasi';
     protected static ?string $slug = 'barang-konsinyasi';
-
+    // tambahan buat grup masterdata
+    protected static ?string $navigationGroup = 'Masterdata';
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form

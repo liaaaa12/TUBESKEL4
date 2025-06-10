@@ -13,6 +13,9 @@ use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use App\Filament\Widgets\DashboardStatCards;
 use App\Filament\Widgets\ProdukTerlarisChart;
+use App\Filament\Widgets\PenjualanKomposisiChart;
+use App\Filament\Widgets\PenjualanPerPembeliChart;
+use App\Filament\Widgets\PenjualanPerBulanChart;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -44,6 +47,9 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
                 DashboardStatCards::class,
                 ProdukTerlarisChart::class,
+                PenjualanKomposisiChart::class,
+                PenjualanPerPembeliChart::class,
+                PenjualanPerBulanChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

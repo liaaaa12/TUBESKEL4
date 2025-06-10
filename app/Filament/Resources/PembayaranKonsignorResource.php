@@ -26,6 +26,9 @@ class PembayaranKonsignorResource extends Resource
 
     protected static ?string $modelLabel = 'Pembayaran Konsignor';
 
+    protected static ?string $navigationGroup = 'Transaksi';
+
+
     public static function form(Form $form): Form
     {
         return $form

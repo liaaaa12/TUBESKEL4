@@ -151,6 +151,8 @@
         .cart-overlay.active {
             display: block;
         }
+        .marquee-container { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; font-weight: 500; font-size: 1rem; display: flex; overflow: hidden; }
+        .marquee-container marquee { flex: 1; padding: 5px 0; }
     </style>
 </head>
 <body>
@@ -187,6 +189,11 @@
                             @csrf
                         </form>
                     </li>
+                    <li class="nav-item ms-3">
+                        <a class="nav-link" href="https://wa.me/62895619859193" target="_blank" title="Hubungi Admin">
+                            <i class="bi bi-whatsapp fs-4" style="color: #25d366;"></i>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -215,11 +222,21 @@
         </button>
     </div>
 
+    <!-- Kalimat Gemini API -->
+    <div class="d-flex gap-2">
+        <div class="marquee flex-fill">
+            <marquee behavior="scroll" direction="left" scrollamount="6">Selamat Datang di MP Mart</marquee>
+        </div>
+        <div class="marquee flex-fill">
+            <marquee behavior="scroll" direction="left" scrollamount="6">Temukan berbagai produk berkualitas hanya di MP Mart</marquee>
+        </div>
+    </div>
+
     <!-- Welcome Section -->
-    <div class="welcome-section">
+    <div class="welcome-section text-center">
         <div class="container">
             <h1>Selamat Datang, {{ Auth::user()->name }}!</h1>
-            <p class="mb-0">Temukan berbagai produk berkualitas dengan harga terbaik</p>
+            <p>Temukan berbagai produk berkualitas hanya di MP Mart</p>
         </div>
     </div>
 

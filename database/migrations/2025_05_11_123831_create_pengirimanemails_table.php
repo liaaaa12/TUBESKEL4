@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('stok');
             $table->decimal('harga', 15, 2);
             $table->decimal('total', 15, 2)->nullable();
+            $table->dateTime('tgl_pengiriman_pesan')->nullable();
             $table->timestamps();
 
             $table->foreign('vendor_barang_id')->references('id')->on('vendor_barang')->onDelete('cascade');

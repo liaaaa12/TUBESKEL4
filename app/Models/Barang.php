@@ -21,10 +21,12 @@ class Barang extends Model
         $result = DB::select("SELECT IFNULL(MAX(Kode_barang), 'AB000') as kode_barang FROM barang");
         $kd = $result[0]->kode_barang;
 
+        // Mengambil substring tiga digit akhir dari kode
         $noAwal = substr($kd, -3);
         $noAkhir = (int)$noAwal + 1;
+        $kodeBaru = 'AB' . str_pad($noAkhir, 3, '0', STR_PAD_LEFT);
 
-        return 'AB' . str_pad($noAkhir, 3, '0', STR_PAD_LEFT);
+        return $kodeBaru;
     }
 
     /**

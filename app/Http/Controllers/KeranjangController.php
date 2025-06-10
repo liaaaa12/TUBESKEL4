@@ -115,13 +115,38 @@ class KeranjangController extends Controller
                     'response' => $outputjson
                 ]);
 
-                // Jika transaksi tidak ditemukan atau error
-                if (!$outputjson || isset($outputjson['status_code']) && $outputjson['status_code'] == '404') {
-                    Log::info('Transaction not found or error');
+                // Handle transaction not found (404) or expired/cancelled/denied transactions
+                if ($httpCode == 404 || 
+                    (isset($outputjson['transaction_status']) && 
+                    in_array($outputjson['transaction_status'], ['expire', 'cancel', 'deny']))) {
+                    
+                    Log::info('Transaction expired/cancelled/not found. Resetting payment data.');
+                    
+                    // Reset payment data to initial state
+                    $pembayaran->update([
+                        'status_code' => null,
+                        'transaction_time' => null,
+                        'settlement_time' => null,
+                        'status_message' => null,
+                        'payment_type' => null,
+                        'merchant_id' => null,
+                        'gross_amount' => 0,
+                        'transaction_id' => null,
+                        'order_id' => null
+                    ]);
+
+                    // Get associated penjualan record
+                    $penjualan = Penjualan::find($pembayaran->penjualan_id);
+                    if ($penjualan) {
+                        $penjualan->update(['status' => 'batal']);
+                        // Restore stock
+                        $this->restoreStock($penjualan->id);
+                    }
+
                     continue;
                 }
 
-                // Update pembayaran record
+                // For valid transactions, update payment record
                 $pembayaran->update([
                     'status_code' => $outputjson['status_code'] ?? null,
                     'transaction_time' => $outputjson['transaction_time'] ?? null,
@@ -149,23 +174,14 @@ class KeranjangController extends Controller
                     'current_penjualan_status' => $penjualan->status
                 ]);
 
-                // Logika update status yang disederhanakan
+                // Update penjualan status
                 if ($status_code == '200') {
                     Log::info('Payment verified (status_code 200) - marking as paid');
                     $penjualan->update(['status' => 'bayar']);
                 } else if ($transaction_status == 'pending') {
                     Log::info('Payment pending');
                     $penjualan->update(['status' => 'pesan']);
-                } else if (in_array($transaction_status, ['deny', 'expire', 'cancel'])) {
-                    Log::info('Payment failed/cancelled/expired');
-                    $penjualan->update(['status' => 'batal']);
                 }
-
-                Log::info('Final payment status:', [
-                    'penjualan_status' => $penjualan->fresh()->status,
-                    'payment_status_code' => $pembayaran->fresh()->status_code,
-                    'transaction_status' => $transaction_status
-                ]);
             }
 
             return response()->json(['success' => true, 'message' => 'Status pembayaran berhasil diperbarui']);
@@ -213,11 +229,13 @@ class KeranjangController extends Controller
             $penjualanExist = DB::table('penjualan')
                 ->join('pembayaran', 'penjualan.id', '=', 'pembayaran.penjualan_id')
                 ->where('penjualan.pembeli_id', $id_pembeli)
+                ->whereNotIn('penjualan.status', ['batal', 'bayar'])
                 ->where(function($query) {
                     $query->where('pembayaran.gross_amount', 0)
                           ->orWhere(function($q) {
                               $q->where('pembayaran.status_code', '!=', 200)
-                                ->where('pembayaran.jenis_pembayaran', 'pg');
+                                ->where('pembayaran.jenis_pembayaran', 'pg')
+                                ->whereNotIn('pembayaran.status_message', ['Pembayaran expire', 'Pembayaran cancel', 'Pembayaran deny']);
                           });
                 })
                 ->select('penjualan.id')
@@ -247,6 +265,9 @@ class KeranjangController extends Controller
                 'gross_amount'      => 0,
             ]);
 
+            // Array untuk menyimpan detail barang untuk kemungkinan restore stok
+            $itemDetails = [];
+
             // Proses setiap item di cart
             foreach ($cart as $item) {
                 if (!isset($item['kode']) || !isset($item['quantity'])) {
@@ -260,7 +281,7 @@ class KeranjangController extends Controller
                         throw new \Exception("Barang konsinyasi dengan kode {$item['kode']} tidak ditemukan");
                     }
                     $kode_barang_konsinyasi = $barang->id;
-                    $Kode_barang = null; // Set null untuk barang konsinyasi
+                    $Kode_barang = null;
                     $harga_beli = $barang->harga;
                     $harga_jual = $barang->harga * 1.2;
                 } else {
@@ -268,8 +289,8 @@ class KeranjangController extends Controller
                     if (!$barang) {
                         throw new \Exception("Barang dengan kode {$item['kode']} tidak ditemukan");
                     }
-                    $kode_barang_konsinyasi = null; // Set null untuk barang biasa
-                    $Kode_barang = $barang->id; // Gunakan Kode_barang asli
+                    $kode_barang_konsinyasi = null;
+                    $Kode_barang = $barang->id;
                     $harga_beli = $barang->harga_barang;
                     $harga_jual = $barang->harga_barang * 1.2;
                 }
@@ -278,6 +299,13 @@ class KeranjangController extends Controller
                 if ($barang->stok < $item['quantity']) {
                     throw new \Exception("Stok tidak mencukupi untuk barang: {$barang->nama_barang} (tersedia: {$barang->stok}, diminta: {$item['quantity']})");
                 }
+
+                // Simpan detail barang untuk kemungkinan restore stok
+                $itemDetails[] = [
+                    'model' => get_class($barang),
+                    'id' => $barang->id,
+                    'quantity' => $item['quantity']
+                ];
 
                 // Hitung subtotal
                 $subtotal = $item['quantity'] * $harga_jual;
@@ -302,6 +330,9 @@ class KeranjangController extends Controller
 
                 Log::info("Stok barang {$barang->nama_barang} dikurangi sebanyak {$item['quantity']}");
             }
+
+            // Simpan detail barang di session untuk kemungkinan restore
+            session(['pending_transaction_items' => $itemDetails]);
 
             // Update total tagihan
             $total = DB::table('penjualan_barang')
@@ -337,7 +368,10 @@ class KeranjangController extends Controller
                     'start_time' => date("Y-m-d H:i:s O"),
                     'unit'       => 'minutes',
                     'duration'   => 2
-                ]
+                ],
+                'finish_redirect_url' => route('customer'),    // Untuk pembayaran sukses
+                'unfinish_redirect_url' => route('customer'), // Untuk pembayaran pending
+                'error_redirect_url' => route('customer')      // Untuk pembayaran error/expired
             ];
 
             try {
@@ -359,7 +393,10 @@ class KeranjangController extends Controller
 
             DB::commit();
             Log::info("Transaksi berhasil dibuat: {$order_id}");
-            return response()->json(['snap_token' => $snapToken]);
+            return response()->json([
+                'snap_token' => $snapToken,
+                'order_id' => $order_id
+            ]);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -410,6 +447,8 @@ class KeranjangController extends Controller
             } elseif ($transactionStatus == 'pending') {
                 $penjualan->update(['status' => 'pesan']);
             } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                // Restore stock for cancelled/expired transactions
+                $this->restoreStock($penjualan->id);
                 $penjualan->update(['status' => 'batal']);
             }
 
@@ -421,7 +460,37 @@ class KeranjangController extends Controller
         }
     }
 
-    public function checkStatus($orderId)
+    private function restoreStock($penjualanId)
+    {
+        try {
+            $penjualanBarang = DB::table('penjualan_barang')
+                ->where('penjualan_id', $penjualanId)
+                ->get();
+
+            foreach ($penjualanBarang as $item) {
+                if ($item->kode_barang_konsinyasi) {
+                    $barang = BarangKonsinyasi::find($item->kode_barang_konsinyasi);
+                    if ($barang) {
+                        $barang->stok += $item->jml;
+                        $barang->save();
+                        Log::info("Restored stock for konsinyasi item: {$item->kode_barang_konsinyasi}, amount: {$item->jml}");
+                    }
+                } else if ($item->Kode_barang) {
+                    $barang = Barang::find($item->Kode_barang);
+                    if ($barang) {
+                        $barang->stok += $item->jml;
+                        $barang->save();
+                        Log::info("Restored stock for regular item: {$item->Kode_barang}, amount: {$item->jml}");
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error restoring stock: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function checkStatus($orderId, Request $request)
     {
         try {
             $pembayaran = Pembayaran::where('order_id', $orderId)->first();
@@ -434,13 +503,78 @@ class KeranjangController extends Controller
                 return response()->json(['error' => 'Sale not found'], 404);
             }
 
+            // Handle forced cancellation from Return to Merchant button
+            if ($request->has('force_cancel')) {
+                // Update pembayaran status
+                $pembayaran->update([
+                    'status_code' => '202',
+                    'status_message' => 'Transaction Cancelled',
+                    'transaction_status' => 'cancel'
+                ]);
+
+                // Update penjualan status and restore stock
+                $penjualan->update(['status' => 'batal']);
+                $this->restoreStock($penjualan->id);
+
+                return response()->json([
+                    'status' => 'batal',
+                    'payment_status' => 'cancelled',
+                    'message' => 'Transaction has been cancelled'
+                ]);
+            }
+
+            // Check Midtrans status
+            $serverKey = config('midtrans.server_key');
+            $URL = 'https://api.sandbox.midtrans.com/v2/'.$orderId.'/status';
+            
+            $ch = curl_init(); 
+            curl_setopt($ch, CURLOPT_URL, $URL);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD, $serverKey.":"); 
+            
+            $response = curl_exec($ch); 
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $responseData = json_decode($response, true);
+
+            // Handle expired or cancelled transactions
+            if ($httpCode == 404 || 
+                (isset($responseData['transaction_status']) && 
+                 in_array($responseData['transaction_status'], ['expire', 'cancel', 'deny']))) {
+                
+                // Update pembayaran status
+                $pembayaran->update([
+                    'status_code' => $responseData['status_code'] ?? '202',
+                    'status_message' => $responseData['status_message'] ?? 'Transaction Expired',
+                    'transaction_status' => $responseData['transaction_status'] ?? 'expire'
+                ]);
+
+                // Update penjualan status and restore stock
+                $penjualan->update(['status' => 'batal']);
+                $this->restoreStock($penjualan->id);
+
+                return response()->json([
+                    'status' => 'batal',
+                    'payment_status' => 'expired',
+                    'redirect' => route('customer')
+                ]);
+            }
+
             return response()->json([
                 'status' => $penjualan->status,
-                'payment_status' => $pembayaran->status_message
+                'payment_status' => $pembayaran->status_message,
+                'transaction_status' => $responseData['transaction_status'] ?? null
             ]);
+
         } catch (\Exception $e) {
             Log::error('Error checking payment status: ' . $e->getMessage());
-            return response()->json(['error' => 'Internal server error'], 500);
+            return response()->json([
+                'error' => 'Internal server error',
+                'status' => 'error',
+                'redirect' => route('customer')
+            ], 500);
         }
     }
 
@@ -492,6 +626,96 @@ class KeranjangController extends Controller
                 'error' => true,
                 'message' => 'Error saat testing: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function riwayatTransaksi(Request $request)
+    {
+        try {
+            $id_user = Auth::user()->id;
+            
+            // Get pembeli ID
+            $pembeli = DB::table('pembeli')
+                ->where('user_id', $id_user)
+                ->select('id')
+                ->first();
+
+            if (!$pembeli) {
+                return redirect()->route('customer')->with('error', 'Data pembeli tidak ditemukan');
+            }
+
+            // Build query
+            $query = DB::table('penjualan')
+                ->join('pembayaran', 'penjualan.id', '=', 'pembayaran.penjualan_id')
+                ->join('pembeli', 'penjualan.pembeli_id', '=', 'pembeli.id')
+                ->where('penjualan.pembeli_id', $pembeli->id);
+
+            // Apply date filters if provided
+            if ($request->has('start_date') && $request->start_date) {
+                $query->whereDate('penjualan.tgl', '>=', $request->start_date);
+            }
+            if ($request->has('end_date') && $request->end_date) {
+                $query->whereDate('penjualan.tgl', '<=', $request->end_date);
+            }
+
+            // Get filtered transactions
+            $transaksi = $query->select(
+                    'penjualan.id',
+                    'penjualan.no_faktur',
+                    'penjualan.tgl',
+                    'penjualan.tagihan',
+                    'penjualan.status',
+                    'pembayaran.payment_type',
+                    'pembayaran.status_message',
+                    'pembayaran.transaction_time',
+                    'pembayaran.settlement_time'
+                )
+                ->orderBy('penjualan.tgl', 'desc')
+                ->get();
+
+            // Get details for each transaction
+            $details = [];
+            foreach ($transaksi as $t) {
+                // Get regular items
+                $regular_items = DB::table('penjualan_barang')
+                    ->join('barang', 'penjualan_barang.Kode_barang', '=', 'barang.id')
+                    ->where('penjualan_barang.penjualan_id', $t->id)
+                    ->whereNotNull('penjualan_barang.Kode_barang')
+                    ->select(
+                        'barang.nama_barang',
+                        'penjualan_barang.jml',
+                        'penjualan_barang.harga_jual',
+                        DB::raw('penjualan_barang.jml * penjualan_barang.harga_jual as subtotal'),
+                        DB::raw("'regular' as tipe")
+                    )
+                    ->get();
+
+                // Get konsinyasi items
+                $konsinyasi_items = DB::table('penjualan_barang')
+                    ->join('barang_konsinyasi', 'penjualan_barang.kode_barang_konsinyasi', '=', 'barang_konsinyasi.id')
+                    ->where('penjualan_barang.penjualan_id', $t->id)
+                    ->whereNotNull('penjualan_barang.kode_barang_konsinyasi')
+                    ->select(
+                        'barang_konsinyasi.nama_barang',
+                        'penjualan_barang.jml',
+                        'penjualan_barang.harga_jual',
+                        DB::raw('penjualan_barang.jml * penjualan_barang.harga_jual as subtotal'),
+                        DB::raw("'konsinyasi' as tipe")
+                    )
+                    ->get();
+
+                // Combine both types of items
+                $details[$t->id] = $regular_items->concat($konsinyasi_items);
+            }
+
+            return view('riwayat_transaksi', [
+                'transaksi' => $transaksi,
+                'details' => $details
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error in riwayatTransaksi: ' . $e->getMessage());
+            return redirect()->route('customer')->with('error', 'Terjadi kesalahan saat memuat riwayat transaksi');
         }
     }
 }

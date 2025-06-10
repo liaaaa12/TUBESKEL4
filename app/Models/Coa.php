@@ -20,4 +20,9 @@ class Coa extends Model
         'saldo',
         'posisi'
     ];
+
+    public function journalDetail()
+    {
+        return $this->hasMany(JurnalDetail::class);
+    }
 }

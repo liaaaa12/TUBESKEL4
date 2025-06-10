@@ -45,33 +45,28 @@ class PembelianBarangResource extends Resource
                     ->options(Barang::all()->pluck('nama_barang', 'id'))
                     ->required()
                     ->searchable(),
-                    Forms\Components\TextInput::make('stok')
+                Forms\Components\TextInput::make('stok')
                     ->label('Stok')
                     ->numeric()
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $set, $get) {
-                        $set('total', (int) $state * (int) $get('harga'));
+                        $harga = $get('harga') ?? 0;
+                        $set('total', (int)$state * (int)$harga);
                     }),
                 Forms\Components\TextInput::make('harga')
                     ->label('Harga')
                     ->numeric()
-                    ->prefix('Rp')
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, $set, $get) {
-                        $set('total', (int) $get('stok') * (int) $state);
-                    }),                
+                        $stok = $get('stok') ?? 0;
+                        $set('total', (int)$stok * (int)$state);
+                    }),
                 Forms\Components\TextInput::make('total')
                     ->label('Total')
                     ->prefix('Rp')
-                    ->readOnly()
-                    ->reactive()
-                    ->afterStateUpdated(function (
-                        $state, $set, $get
-                    ) {
-                        $set('total', (int) $get('stok') * (int) $get('harga'));
-                    }),
+                    ->readOnly(),
                 Forms\Components\Select::make('keterangan')
                     ->label('Keterangan')
                     ->options([
@@ -173,4 +168,5 @@ class PembelianBarangResource extends Resource
             'edit' => Pages\EditPembelianBarang::route('/{record}/edit'),
         ];
     }
+
 }

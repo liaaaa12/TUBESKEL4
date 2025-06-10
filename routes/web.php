@@ -46,34 +46,10 @@ Route::middleware(['auth', 'customer'])->group(function () {
 
     // Cek Status Pembayaran
     Route::get('/cek_status_pembayaran_pg', [KeranjangController::class, 'cek_status_pembayaran_pg']);
+
+    // Transaction History Route
+    Route::get('/riwayat-transaksi', [KeranjangController::class, 'riwayatTransaksi'])->name('riwayat.transaksi');
 });
 
 // Payment & Midtrans Routes
-Route::post('/payment/callback', [KeranjangController::class, 'handleCallback'])->name('payment.callback');
-Route::get('/payment/status/{orderId}', [KeranjangController::class, 'checkStatus'])->name('payment.status');
-Route::get('/payment/check-status-pg', [KeranjangController::class, 'cek_status_pembayaran_pg'])->name('payment.check.status');
-Route::post('/payment/create-transaction', [KeranjangController::class, 'createTransaction'])->name('payment.create');
-
-// Auto Refresh Route
-Route::get('/payment/auto-refresh', function() {
-    app(KeranjangController::class)->cek_status_pembayaran_pg();
-    return view('autorefresh_penjualan');
-})->name('payment.autorefresh_penjualan');
-
-// Test Routes (only for development)
-Route::get('/test-callback', [KeranjangController::class, 'testCallback'])->name('test.callback');
-Route::get('/test-callback/{status}', [KeranjangController::class, 'testCallbackStatus'])->name('test.callback.status');
-Route::get('/test-payment-callback', [KeranjangController::class, 'testSimpleCallback'])->name('test.callback.simple');
-
-// Contoh Kirim Email
-Route::get('/kirim-email', function () {
-    $nama = 'Abiyyu';
-    Mail::to('arkan230905@gmail.com')->send(new TesMail($nama));
-    return 'Email berhasil dikirim ke Mailtrap!';
-});
-Route::get('/penjualan/export-pdf', function () {
-    $penjualan = \App\Models\Penjualan::all();
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.penjualan', compact('penjualan'));
-    return $pdf->download('penjualan.pdf');
-});
-
+Route::p

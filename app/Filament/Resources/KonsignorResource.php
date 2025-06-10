@@ -24,6 +24,8 @@ class KonsignorResource extends Resource
     protected static ?string $navigationLabel = 'Konsignors';
     protected static ?string $pluralLabel = 'Konsignors';
     protected static ?string $modelLabel = 'Konsignor';
+    // tambahan buat grup masterdata
+    protected static ?string $navigationGroup = 'Masterdata';
 
     public static function form(Form $form): Form
     {

@@ -25,6 +25,9 @@ class UserResource extends Resource
     protected static ?string $navigationLabel = 'User';
     protected static ?string $slug = 'User';
 
+    // tambahan buat grup masterdata
+    protected static ?string $navigationGroup = 'Masterdata';
+
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
     public static function form(Form $form): Form

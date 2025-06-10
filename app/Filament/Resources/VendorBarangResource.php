@@ -23,6 +23,9 @@ class VendorBarangResource extends Resource
 
     protected static ?string $navigationLabel = 'Vendor Barang';
 
+    // tambahan buat grup masterdata
+    protected static ?string $navigationGroup = 'Masterdata';
+
     public static function form(Form $form): Form
     {
         return $form

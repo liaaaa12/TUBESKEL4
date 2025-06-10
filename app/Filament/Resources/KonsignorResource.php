@@ -73,7 +73,7 @@ class KonsignorResource extends Resource
                     ->searchable(),
 
                     TextColumn::make('email')
-                    ->label('Nama')
+                    ->label('Email')
                     ->sortable()
                     ->searchable(),
                     

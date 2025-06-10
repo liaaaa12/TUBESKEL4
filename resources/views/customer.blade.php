@@ -225,10 +225,10 @@
     <!-- Kalimat Gemini API -->
     <div class="d-flex gap-2">
         <div class="marquee flex-fill">
-            <marquee behavior="scroll" direction="left" scrollamount="6">Selamat Datang di MP Mart</marquee>
+            <marquee behavior="scroll" direction="left" scrollamount="6">{{ $kalimat1 }}</marquee>
         </div>
         <div class="marquee flex-fill">
-            <marquee behavior="scroll" direction="left" scrollamount="6">Temukan berbagai produk berkualitas hanya di MP Mart</marquee>
+            <marquee behavior="scroll" direction="left" scrollamount="6">{{ $kalimat2 }}</marquee>
         </div>
     </div>
 

@@ -19,7 +19,7 @@ class VendorBarangResource extends Resource
 {
     protected static ?string $model = VendorBarang::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $navigationLabel = 'Vendor Barang';
 

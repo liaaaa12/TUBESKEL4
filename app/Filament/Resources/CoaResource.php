@@ -24,7 +24,7 @@ class CoaResource extends Resource
     protected static ?string $navigationLabel = 'Coa';
     protected static ?string $slug = 'Coa';
 
-    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document';
 
     public static function form(Form $form): Form
     {

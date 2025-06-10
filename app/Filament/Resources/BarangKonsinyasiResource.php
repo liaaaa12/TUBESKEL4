@@ -19,7 +19,7 @@ use Filament\Tables\Actions\DeleteAction;
 class BarangKonsinyasiResource extends Resource
 {
     protected static ?string $model = BarangKonsinyasi::class;
-    protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
     protected static ?string $navigationLabel = 'Barang Konsinyasi';
     protected static ?string $slug = 'barang-konsinyasi';
 
@@ -38,8 +38,7 @@ class BarangKonsinyasiResource extends Resource
                 FileUpload::make('foto')
                     ->label('Foto')
                     ->directory('foto')
-                    ->image()
-                    ->required(),
+                    ->visibility('public'),
                 TextInput::make('stok')
                     ->label('Stok')
                     ->numeric()

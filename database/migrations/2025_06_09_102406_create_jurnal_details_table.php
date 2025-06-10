@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('jurnal_detail', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('jurnal_id')->constrained('jurnal')->cascadeOnDelete();
-            $table->foreignId('kode_akun')->constrained('coa')->cascadeOnDelete();
+            $table->foreignId('jurnal_id')->constrained('jurnals')->cascadeOnDelete();
+            $table->foreignId('coa_id')->constrained('coa')->cascadeOnDelete(); 
             $table->string('deskripsi')->nullable();
-            $table->decimal('debit',15,2)->default(0);
-            $table->decimal('credit',15,2)->default(0);
+            $table->decimal('debit', 15, 2)->default(0);
+            $table->decimal('credit', 15, 2)->default(0);
             $table->timestamps();
-        });
+});
+
     }
 
     /**

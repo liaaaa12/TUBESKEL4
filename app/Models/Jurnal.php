@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Jurnal extends Model
 {
-    protected $table = 'jurnal'; // Nama tabel eksplisit
+    protected $table = 'jurnals'; // Nama tabel eksplisit
 
     protected $guarded = [];
 

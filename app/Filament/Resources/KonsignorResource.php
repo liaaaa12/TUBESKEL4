@@ -20,7 +20,7 @@ class KonsignorResource extends Resource
 {
     protected static ?string $model = Konsignor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Konsignors';
     protected static ?string $pluralLabel = 'Konsignors';
     protected static ?string $modelLabel = 'Konsignor';

@@ -26,7 +26,7 @@ class BarangResource extends Resource
 {
     protected static ?string $model = Barang::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
     public static function form(Form $form): Form
     {
@@ -59,7 +59,7 @@ class BarangResource extends Resource
                     ->numeric(),
                 FileUpload::make('foto')
                     ->directory('foto')
-                    ->required(),
+                    ->visibility('public'),
                 TextInput::make('stok')
                     ->required()
                     ->placeholder('Masukkan stok barang') // Placeholder untuk membantu pengguna

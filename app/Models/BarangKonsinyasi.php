@@ -17,7 +17,7 @@ class BarangKonsinyasi extends Model
         'foto',
         'stok',
         'harga',
-        'id_konsignor'
+        'id_konsignor',
     ];
 
     public static function getKodeBarangKonsinyasi()

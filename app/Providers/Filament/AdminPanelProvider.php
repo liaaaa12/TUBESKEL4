@@ -13,6 +13,7 @@ use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use App\Filament\Widgets\DashboardStatCards;
 use App\Filament\Widgets\ProdukTerlarisChart;
+use App\Filament\Widgets\PenjualanKomposisiChart; // ✅ tambahkan ini
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -44,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
                 DashboardStatCards::class,
                 ProdukTerlarisChart::class,
+                PenjualanKomposisiChart::class, // ✅ widget pie chart kamu ditambahkan di sini
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -37,14 +37,24 @@ class ProdukTerlarisChart extends ChartWidget
             return $items->sum('total_sold');
         })->sortDesc();
 
+        $colors = ['#4CAF50', '#2196F3', '#FFC107', '#F44336', '#9C27B0', '#FF9800', '#795548', '#607D8B'];
+        
+        $productColors = [];
+        $i = 0;
+        foreach ($productSales->keys() as $productName) {
+            $productColors[] = $colors[$i % count($colors)];
+            $i++;
+        }
+
         return [
             'labels' => $productSales->keys()->toArray(),
             'datasets' => [
                 [
                     'label' => 'Jumlah Terjual',
                     'data' => $productSales->values()->toArray(),
-                    'backgroundColor' => '#36A2EB',
-                    'borderColor' => '#9BD0F5',
+                    'backgroundColor' => $productColors,
+                    'borderColor' => $productColors,
+                    'borderWidth' => 1,
                 ],
             ],
         ];
